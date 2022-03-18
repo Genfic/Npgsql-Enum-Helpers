@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net6.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <RootNamespace>NpgsqlEnumHelper.Demo</RootNamespace>
+
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <CompilerGeneratedFilesOutputPath>_generated</CompilerGeneratedFilesOutputPath>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NpgsqlEnumHelper.Attributes\NpgsqlEnumHelper.Attributes.csproj" />
+        <ProjectReference Include="..\NpgsqlEnumHelper\NpgsqlEnumHelper.csproj" OutputItemType="Analyzer" />
+    </ItemGroup>
+
+</Project>

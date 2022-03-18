@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpgsqlEnumHelper.Demo", "NpgsqlEnumHelper.Demo\NpgsqlEnumHelper.Demo.csproj", "{227F35C2-B375-4857-AE32-D72F76DD807D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpgsqlEnumHelper", "NpgsqlEnumHelper\NpgsqlEnumHelper.csproj", "{B285AEEC-FC28-47F8-A58B-6C4647EDE70F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NpgsqlEnumHelper.Attributes", "NpgsqlEnumHelper.Attributes\NpgsqlEnumHelper.Attributes.csproj", "{C854B7C3-91BB-453B-8A4A-F0CE37CD4774}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{227F35C2-B375-4857-AE32-D72F76DD807D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{227F35C2-B375-4857-AE32-D72F76DD807D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{227F35C2-B375-4857-AE32-D72F76DD807D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{227F35C2-B375-4857-AE32-D72F76DD807D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B285AEEC-FC28-47F8-A58B-6C4647EDE70F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B285AEEC-FC28-47F8-A58B-6C4647EDE70F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B285AEEC-FC28-47F8-A58B-6C4647EDE70F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B285AEEC-FC28-47F8-A58B-6C4647EDE70F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C854B7C3-91BB-453B-8A4A-F0CE37CD4774}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C854B7C3-91BB-453B-8A4A-F0CE37CD4774}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C854B7C3-91BB-453B-8A4A-F0CE37CD4774}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C854B7C3-91BB-453B-8A4A-F0CE37CD4774}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
