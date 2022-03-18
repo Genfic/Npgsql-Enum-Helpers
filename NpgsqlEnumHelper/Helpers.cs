@@ -1,14 +1,15 @@
 using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using NpgsqlEnumHelper.Attributes;
 
 namespace NpgsqlEnumHelper;
 
 public static class Helpers
 {
+    internal const string AttributeName = "NpgsqlEnumAttribute";
+
     // determine the namespace the class/enum/struct is declared in, if any
-    public static string GetNamespace(this SyntaxNode syntax)
+    internal static string GetNamespace(this SyntaxNode syntax)
     {
         // If we don't have a namespace at all we'll return an empty string
         // This accounts for the "default namespace" case
@@ -48,19 +49,17 @@ public static class Helpers
         return nameSpace;
     }
     
-    public static EnumDeclarationSyntax? GetSemanticTargetForGeneration(this GeneratorSyntaxContext context)
+    internal static EnumDeclarationSyntax? GetSemanticTargetForGeneration(this GeneratorSyntaxContext context)
     {
         // we know the node is a EnumDeclarationSyntax thanks to IsSyntaxTargetForGeneration
         var enumDeclarationSyntax = (EnumDeclarationSyntax)context.Node;
-
+        
         // loop through all the attributes on the method
         foreach (var attributeSyntax in enumDeclarationSyntax.AttributeLists.SelectMany(als => als.Attributes))
         {
             if (context.SemanticModel.GetSymbolInfo(attributeSyntax).Symbol is not IMethodSymbol attributeSymbol) continue;
-
-            var name = attributeSymbol.ContainingType.Name;
-
-            if (true) //attributeSymbol.ContainingType == typeof(NpgsqlEnumAttribute))
+            
+            if (attributeSymbol.ContainingType.Name == AttributeName)
             {
                 // return the enum
                 return enumDeclarationSyntax;

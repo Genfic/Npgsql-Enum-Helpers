@@ -1,7 +1,11 @@
-﻿using NpgsqlEnumHelper.Demo.Shims;
-// using PostgresEnumHelpers.Generated;
+﻿using Npgsql;
+using Npgsql.TypeMapping;
+using PostgresEnumHelpers.Generated;
 
 Console.WriteLine("Hello, World!");
 
-var mapper = new NpgsqlTypeMapper();
-// mapper.MapPostgresEnums();
+INpgsqlTypeMapper mapper = new NpgsqlTypeMapper();
+mapper.MapPostgresEnums();
+
+var builder = new ModelBuilder();
+builder.RegisterPostgresEnums();

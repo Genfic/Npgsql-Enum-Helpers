@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -6,7 +7,6 @@ using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using NpgsqlEnumHelper.Attributes;
 
 namespace NpgsqlEnumHelper;
 
@@ -24,24 +24,24 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
 
         IncrementalValueProvider<(Compilation, ImmutableArray<EnumDeclarationSyntax>)> compilationAndEnums
             = context.CompilationProvider.Combine(enumDeclarations.Collect());
-        
-        context.RegisterSourceOutput(compilationAndEnums, static (spc, source) 
+
+        context.RegisterSourceOutput(compilationAndEnums, static (spc, source)
             => Execute(source.Item1, source.Item2, spc));
     }
-    
+
     private static void Execute(Compilation compilation, ImmutableArray<EnumDeclarationSyntax> enums, SourceProductionContext context)
     {
-        if (enums.IsDefaultOrEmpty) return;
+        // if (enums.IsDefaultOrEmpty) return;
 
         var enumsToGenerate = GetTypesToGenerate(compilation, enums.Distinct(), context.CancellationToken);
 
-        if (enumsToGenerate.Count <= 0) return;
-        
+        // if (enumsToGenerate.Count <= 0) return;
+
         var result = GenerateClass(enumsToGenerate);
         context.AddSource("NpgsqlEnumHelper.g.cs", SourceText.From(result, Encoding.UTF8));
     }
 
-    private static string GenerateClass(List<EnumToGenerate> enumsToGenerate)
+    private static string GenerateClass((List<EnumToGenerate> Enums, List<string> Log) enumsToGenerate)
     {
         var sb = new StringBuilder();
         sb.AppendLine("#nullable enable");
@@ -51,36 +51,75 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
         sb.AppendLine("public static class PostgresEnumExtensions");
         sb.AppendLine("{");
 
-        sb.AppendLine("\tpublic static INpgsqlTypeMapper MapPostgresEnums(this INpgsqlTypeMapper mapper, INpgsqlNameTranslator? translator = null)");
+        sb.AppendLine(
+            "\tpublic static INpgsqlTypeMapper MapPostgresEnums(this INpgsqlTypeMapper mapper, INpgsqlNameTranslator? translator = null)");
         sb.AppendLine("\t{");
-        foreach (var e in enumsToGenerate)
+        foreach (var e in enumsToGenerate.Enums)
         {
             sb.AppendLine($"\t\tmapper.MapEnum<{e.EnumName}>(translator);");
         }
+
+        sb.AppendLine("\t\treturn mapper;");
         sb.AppendLine("\t}");
 
-        sb.AppendLine("\tpublic static void RegisterPostgresEnums(this ModelBuilder builder, string? schema = null, INpgsqlNameTranslator? translator = null)");
+        sb.AppendLine(
+            "\tpublic static void RegisterPostgresEnums(this ModelBuilder builder, string? schema = null, INpgsqlNameTranslator? translator = null)");
         sb.AppendLine("\t{");
-        foreach (var e in enumsToGenerate)
+        foreach (var e in enumsToGenerate.Enums)
         {
             sb.AppendLine($"\t\tbuilder.HasPostgresEnum<{e.EnumName}>(schema, \"{e.Alias ?? "null"}\", translator);");
         }
+
         sb.AppendLine("\t}");
 
-        sb.Append("}");
+        sb.AppendLine("}");
+
+        sb.AppendLine("/*");
+        sb.AppendLine($"Generation time: {DateTime.Now}");
+        foreach (var log in enumsToGenerate.Log)
+        {
+            sb.AppendLine(log);
+        }
+
+        sb.AppendLine("*/");
 
         return sb.ToString();
     }
 
-    private static List<EnumToGenerate> GetTypesToGenerate(Compilation compilation, IEnumerable<EnumDeclarationSyntax> enums, CancellationToken ct)
+    private static (List<EnumToGenerate> Enums, List<string> Log) GetTypesToGenerate(
+        Compilation compilation,
+        IEnumerable<EnumDeclarationSyntax> enums,
+        CancellationToken ct)
     {
         var enumsToGenerate = new List<EnumToGenerate>();
-        
-        var enumAttribute = compilation.GetTypeByMetadataName(nameof(NpgsqlEnumAttribute));
+        var enumDeclarationSyntaxes = enums as EnumDeclarationSyntax[] ?? enums.ToArray();
 
-        if (enumAttribute is null) return enumsToGenerate;
+        var log = new List<string>
+        {
+            $"Found {enumDeclarationSyntaxes.Length} enums in total:",
+            "\t" + string.Join("\n\t", enumDeclarationSyntaxes.Select(eds => eds.Identifier.ToString()))
+        };
 
-        foreach (var enumDeclarationSyntax in enums)
+
+        foreach (var nts in compilation.GlobalNamespace.GetMembers().SelectMany(m => m.GetTypeMembers()))
+        {
+            log.Add($"Found symbol {nts.Name} — {nts.MetadataName}");
+            log.Add($"\tHas attribute: {nts.GetAttributes().Any()}");
+            log.Add("\t\t" + string.Join("\n\t\t\t", nts.GetAttributes().Select(a => a.GetType().Name)));
+        }
+
+        var enumAttribute = compilation.GlobalNamespace
+            .GetMembers()
+            .SelectMany(m => m.GetTypeMembers())
+            .FirstOrDefault(m => m.Name == Helpers.AttributeName);
+
+        if (enumAttribute is null)
+        {
+            log.Add(enumAttribute?.Name ?? "null");
+            return (enumsToGenerate, log);
+        }
+
+        foreach (var enumDeclarationSyntax in enumDeclarationSyntaxes)
         {
             ct.ThrowIfCancellationRequested();
 
@@ -90,14 +129,14 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
             var enumName = enumSymbol.ToString();
 
             string? alias = null;
-            
+
             var pairs = enumSymbol.GetAttributes()
                 .Where(attributeData => enumAttribute.Equals(attributeData.AttributeClass, SymbolEqualityComparer.Default))
                 .SelectMany(attributeData => attributeData.NamedArguments);
-            
+
             foreach (var argument in pairs)
             {
-                if (argument.Key == nameof(NpgsqlEnumAttribute.Alias) && argument.Value.Value?.ToString() is { } n)
+                if (argument.Key == "Alias" && argument.Value.Value?.ToString() is { } n)
                 {
                     alias = n;
                 }
@@ -107,7 +146,7 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
             enumsToGenerate.Add(new EnumToGenerate(enumName, alias));
         }
 
-        return enumsToGenerate;
+        return (enumsToGenerate, log);
     }
 
 
@@ -125,5 +164,4 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
 
 
     private static bool IsSyntaxTargetForGeneration(SyntaxNode node) => node is EnumDeclarationSyntax { AttributeLists.Count: > 0 };
-
 }

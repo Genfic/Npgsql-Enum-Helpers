@@ -1,4 +1,5 @@
-namespace NpgsqlEnumHelper.Demo.Shims;
+// ReSharper disable once CheckNamespace
+namespace Npgsql;
 
 public interface INpgsqlTypeMapper
 {
