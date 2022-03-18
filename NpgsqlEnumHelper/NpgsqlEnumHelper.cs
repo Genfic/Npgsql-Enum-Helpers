@@ -37,11 +37,11 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
 
         if (enumsToGenerate.Count <= 0) return;
         
-        var result = GenerateExtensionClass(enumsToGenerate);
+        var result = GenerateClass(enumsToGenerate);
         context.AddSource("NpgsqlEnumHelper.g.cs", SourceText.From(result, Encoding.UTF8));
     }
 
-    private static string GenerateExtensionClass(List<EnumToGenerate> enumsToGenerate)
+    private static string GenerateClass(List<EnumToGenerate> enumsToGenerate)
     {
         var sb = new StringBuilder();
         sb.AppendLine("#nullable enable");

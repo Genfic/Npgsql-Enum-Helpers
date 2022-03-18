@@ -1,16 +1,7 @@
-﻿using NpgsqlEnumHelper.Attributes;
-using NpgsqlEnumHelper.Demo.Shims;
+﻿using NpgsqlEnumHelper.Demo.Shims;
+// using PostgresEnumHelpers.Generated;
 
 Console.WriteLine("Hello, World!");
 
 var mapper = new NpgsqlTypeMapper();
 // mapper.MapPostgresEnums();
-
-[NpgsqlEnum]
-enum Animals
-{
-    Cat,
-    Dog,
-    Parrot,
-    Tardigrade
-}
