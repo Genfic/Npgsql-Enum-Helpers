@@ -63,7 +63,7 @@ public class PostgresEnumSourceGenerator : IIncrementalGenerator
         sb.AppendLine("\t{");
         foreach (var e in enumsToGenerate)
         {
-            sb.AppendLine($"\t\tbuilder.HasPostgresEnum<{e.EnumName}>(schema, \"{e.Alias}\", translator);");
+            sb.AppendLine($"\t\tbuilder.HasPostgresEnum<{e.EnumName}>(schema, \"{e.Alias ?? "null"}\", translator);");
         }
         sb.AppendLine("\t}");
 

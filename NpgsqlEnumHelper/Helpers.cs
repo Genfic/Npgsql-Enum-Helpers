@@ -28,21 +28,20 @@ public static class Helpers
         }
 
         // Build up the final namespace by looping until we no longer have a namespace declaration
-        if (potentialNamespaceParent is BaseNamespaceDeclarationSyntax namespaceParent)
+        if (potentialNamespaceParent is not BaseNamespaceDeclarationSyntax namespaceParent) return nameSpace;
+        
+        // We have a namespace. Use that as the type
+        nameSpace = namespaceParent.Name.ToString();
+
+        // Keep moving "out" of the namespace declarations until we 
+        // run out of nested namespace declarations
+        while (true)
         {
-            // We have a namespace. Use that as the type
-            nameSpace = namespaceParent.Name.ToString();
+            if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent) break;
 
-            // Keep moving "out" of the namespace declarations until we 
-            // run out of nested namespace declarations
-            while (true)
-            {
-                if (namespaceParent.Parent is not NamespaceDeclarationSyntax parent) break;
-
-                // Add the outer namespace as a prefix to the final namespace
-                nameSpace = $"{namespaceParent.Name}.{nameSpace}";
-                namespaceParent = parent;
-            }
+            // Add the outer namespace as a prefix to the final namespace
+            nameSpace = $"{namespaceParent.Name}.{nameSpace}";
+            namespaceParent = parent;
         }
 
         // return the final namespace
