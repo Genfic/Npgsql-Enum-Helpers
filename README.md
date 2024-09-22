@@ -3,6 +3,9 @@
 Source generator that generates code used to register and map enums to
 [NpgSQL](https://github.com/npgsql/npgsql)
 
+> [!CAUTION]
+> Superseded by https://github.com/Atulin/NpgsqlSourceGenerators
+
 ## Usage
 
 1. Add the `[NpgsqlEnum]` attribute to selected enums
